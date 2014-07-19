@@ -78,6 +78,7 @@ These are turned off.
 
 * `unsafe` blocks
 * foreign items
+* using `#[feature(...)]`
 
 # TODO
 

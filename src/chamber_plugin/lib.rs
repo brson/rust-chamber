@@ -27,6 +27,7 @@ use syntax::ast;
 pub fn plugin_registrar(reg: &mut Registry) {
     reg.register_lint_pass(box UnsafeBlockPass);
     reg.register_lint_pass(box ForeignItemPass);
+    reg.register_lint_pass(box FeatureGatePass);
 }
 
 
@@ -66,6 +67,28 @@ impl LintPass for ForeignItemPass {
 
     fn check_foreign_item(&mut self, ctx: &Context, item: &ast::ForeignItem) {
         ctx.tcx.sess.span_err(item.span, "chamber: foreign item");
+    }
+}
+
+
+declare_lint!(FEATURE_GATE_LINT, Forbid,
+              "enabling experimental features")
+
+/// Forbids using the `#[feature(...)]` attribute
+struct FeatureGatePass;
+
+impl LintPass for FeatureGatePass {
+    fn get_lints(&self) -> LintArray {
+        lint_array!(FEATURE_GATE_LINT)
+    }
+
+    fn check_attribute(&mut self, ctx: &Context, attr: &ast::Attribute) {
+
+        use syntax::attr;
+
+        if attr::contains_name(&[attr.node.value], "feature") {
+            ctx.tcx.sess.span_err(attr.span, "chamber: feature gate");
+        }
     }
 }
 
