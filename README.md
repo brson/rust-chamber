@@ -1,6 +1,6 @@
 # Enter the Rust Chamber
 
-This is a tool for sandboxing Rust code using only the Rust type system.
+This is a tool for sandboxing code using only the Rust type system.
 
 It is not though an endorsement that Rust is suitable for use as a software sandbox.
 
