@@ -34,7 +34,7 @@ Use Cargo, y'all.
 # Running
 
 ```
-chamber breakme.rs
+target/chamber breakme.rs
 ```
 
 This will create the `breakme` bin.
@@ -42,12 +42,15 @@ The `--crate-type` flag and `crate_type` attribute also work.
 
 Chamber comes with a simple 'baseline' chamber and links to it by default.
 To specify a different chamber,
-pass its path behind the `-c` flag:
+pass its name behind the `-c` flag:
 
 ```
-chamber breakme.rs -c libcustomchamber.rlib
+target/chamber breakme.rs -c rcr_custom
 ```
 
+By default Chamber will look in `.`, `./target`, and `./target/deps`, in that order,
+to find chambers.
+The search path can be augmented with `-L`.
 
 # How it works
 

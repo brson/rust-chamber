@@ -12,8 +12,23 @@
 #![crate_type = "bin"]
 #![crate_type = "rlib"]
 
+#![feature(globs)]
+
 extern crate syntax;
 extern crate rustc;
 
+use rustc::driver::config::CrateType;
+
 pub fn main() {
+}
+
+struct Config {
+    crate_types: Vec<CrateType>,
+    chamber_name: Option<String>
+}
+
+pub fn parse_config(args: &[&str]) -> Option<Config> {
+    extern crate getopts;
+
+    use getopts::*;
 }
