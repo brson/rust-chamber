@@ -7,8 +7,9 @@ It is not though an endorsement that Rust is suitable for use as a software sand
 
 # Why then?
 
-The first principle of Rust is that code that does not say the keyword 'unsafe' cannot crash (modulo sunspots).
-More firmly, that safe Rust must be *memory safe*, a term which includes but isn't limited to:
+The first principle of Rust is that code that does not say the keyword 'unsafe' cannot crash (modulo sunspots),
+that safe Rust must be *memory safe*,
+a term which includes but isn't limited to:
 
 * No use after free.
 * No reading uninitialized memory.
@@ -42,10 +43,10 @@ The `--crate-type` flag and `crate_type` attribute also work.
 
 Chamber comes with a simple 'baseline' chamber and links to it by default.
 To specify a different chamber,
-pass its name behind the `-c` flag:
+pass its name behind the `--chamber` flag:
 
 ```
-target/chamber breakme.rs -c rcr_custom
+target/chamber breakme.rs --chamber rcr_custom
 ```
 
 By default Chamber will look in `.`, `./target`, and `./target/deps`, in that order,
