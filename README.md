@@ -5,7 +5,7 @@ This is a tool for sandboxing code using only the Rust type system.
 It is not though an endorsement that Rust is suitable for use as a software sandbox.
 
 
-# Why then?
+# Why?
 
 The first principle of Rust is that code that does not say the keyword 'unsafe' cannot crash (modulo sunspots),
 that safe Rust must be *memory safe*,
@@ -29,21 +29,20 @@ Enough of such attempts and maybe Rust *can* be trusted as a sandbox.
 
 # Building
 
-Use Cargo, y'all.
+`cargo build`
 
 
 # Running
 
 ```
-target/chamber breakme.rs
+target/chamber breakme.rs --sysroot=/usr/local
 ```
-
-*Note: you may need to add `--sysroot=/usr/local`.*
 
 This will create the `breakme` bin.
 The `--crate-type` flag and `crate_type` attribute also work.
 
-Chamber comes with a simple 'baseline' chamber and links to it by default.
+Chamber comes with a simple 'baseline' chamber, `rcr_baseline`,
+and links to it by default.
 To specify a different chamber,
 pass its name behind the `--chamber` flag:
 
