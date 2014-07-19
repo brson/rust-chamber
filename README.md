@@ -44,12 +44,20 @@ To specify a different chamber,
 pass its name behind the `--chamber` flag:
 
 ```
-target/chamber breakme.rs --chamber rcr_custom
+target/chamber breakme.rs --sysroot=/usr/local --chamber rcr_custom
 ```
 
 By default Chamber will look in `.`, `./target`, and `./target/deps`, in that order,
-to find chambers.
+to find chambers, as well as the normal rustc search paths.
 The search path can be augmented with `-L`.
+
+The Rust Standard Library itself is a chamber:
+
+```
+target/chamber breakme.rs --sysroot=/usr/local --chamber std
+```
+
+Warning: `rcr_baseline` currently provides *no features*.
 
 # How it works
 
