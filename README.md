@@ -71,9 +71,17 @@ and chambered libraries may be intermixed freely with normal Rust libraries.
 
 Rust is pretty sweet.
 
+# Blacklisted language features
+
+Some Rust features make it easy to break memory safety.
+These are turned off.
+
+* `unsafe` blocks
+* foreign items
+
 # TODO
 
-* Create blacklist plugin!
+* Blacklist feature ungating
 * Upstream rustc API changes to avoid code duplication.
 * Investigate safety of built-in syntax extensions.
 * Fill out baseline chamber.
