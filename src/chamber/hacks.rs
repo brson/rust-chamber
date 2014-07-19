@@ -152,7 +152,8 @@ pub fn compile_input(sess: Session,
                      input: &Input,
                      outdir: &Option<Path>,
                      output: &Option<Path>,
-                     altstd: Option<String>) {
+                     altstd: Option<String>,
+                     addl_plugins: Plugins) {
     // We need nested scopes here, because the intermediate results can keep
     // large chunks of memory alive and we want to free them as soon as
     // possible to keep the peak memory usage low
@@ -168,7 +169,8 @@ pub fn compile_input(sess: Session,
             let id = link::find_crate_name(Some(&sess), krate.attrs.as_slice(),
                                            input);
             let (expanded_crate, ast_map)
-                = match phase_2_configure_and_expand(&sess, krate, id.as_slice(), altstd) {
+                = match phase_2_configure_and_expand(&sess, krate, id.as_slice(),
+                                                     altstd, addl_plugins) {
                     None => return,
                     Some(p) => p,
                 };
@@ -198,7 +200,9 @@ pub fn compile_input(sess: Session,
 pub fn phase_2_configure_and_expand(sess: &Session,
                                     mut krate: ast::Crate,
                                     crate_name: &str,
-                                    altstd: Option<String>)
+                                    altstd: Option<String>,
+                                    addl_plugins: Plugins
+                                    )
                                     -> Option<(ast::Crate, syntax::ast_map::Map)> {
     let time_passes = sess.time_passes();
 
@@ -224,9 +228,14 @@ pub fn phase_2_configure_and_expand(sess: &Session,
     krate = time(time_passes, "configuration 1", krate, |krate|
                  front::config::strip_unconfigured_items(krate));
 
-    let Plugins { macros, registrars }
+    let Plugins { mut macros, mut registrars }
         = time(time_passes, "plugin loading", (), |_|
                plugin::load::load_plugins(sess, &krate));
+
+    // FIXME: Do this in load_plugins
+    let Plugins { macros: addl_macros, registrars: addl_registrars } = addl_plugins;
+    macros.push_all_move(addl_macros);
+    registrars.push_all_move(addl_registrars);
 
     let mut registry = Registry::new(&krate);
 

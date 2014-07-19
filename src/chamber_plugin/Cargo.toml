@@ -1,0 +1,9 @@
+[package]
+
+name = "chamber_plugin"
+version = "0.1.0"
+authors = [ "Brian Anderson <banderson@mozilla.com>" ]
+
+[[lib]]
+name = "chamber_plugin"
+path = "lib.rs"

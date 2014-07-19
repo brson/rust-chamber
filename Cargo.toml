@@ -8,5 +8,8 @@ authors = [ "Brian Anderson <banderson@mozilla.com>" ]
 name = "chamber"
 path = "src/chamber/lib.rs"
 
+[dependencies.chamber_plugin]
+path = "src/chamber_plugin/"
+
 [dependencies.rcr_baseline]
 path = "src/rcr_baseline/"

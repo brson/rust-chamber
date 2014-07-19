@@ -14,12 +14,14 @@
 
 #![feature(globs)]
 
+extern crate chamber_plugin;
 extern crate getopts;
 extern crate rustc;
 extern crate serialize;
 extern crate syntax;
 
 use rustc::driver::config::CrateType;
+use rustc::plugin::load::Plugins;
 use SessOpts = rustc::driver::config::Options;
 
 pub use driver::main;
@@ -68,7 +70,9 @@ pub fn enchamber(config: Config) -> Result<(), ()> {
 
         let chamber_name = Some(config.chamber_name.clone());
 
-        compile_input(sess, cfg, input_file, out_dir, out_file, chamber_name);
+        let plugins = get_chamber_plugins();
+        
+        compile_input(sess, cfg, input_file, out_dir, out_file, chamber_name, plugins);
     })
 }
 
@@ -97,3 +101,9 @@ fn build_session_options(config: &Config) -> SessOpts {
     }
 }
 
+fn get_chamber_plugins() -> Plugins {
+    Plugins {
+        macros: vec!(),
+        registrars: vec!(chamber_plugin::plugin_registrar)
+    }
+}
