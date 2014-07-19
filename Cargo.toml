@@ -8,6 +8,9 @@ authors = [ "Brian Anderson <banderson@mozilla.com>" ]
 name = "chamber"
 path = "src/chamber/lib.rs"
 
+# FIXME: Uncommenting this results in two 'unused manifest key: lib.crate-types' errors
+#crate-types = [ "rlib", "dylib" ]
+
 [dependencies.chamber_plugin]
 path = "src/chamber_plugin/"
 

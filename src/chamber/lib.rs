@@ -11,21 +11,13 @@
 //! Rust Chamber. Language-based Sandboxing for Rust.
 //!
 //! Chamber is a Rust compiler. It is implemented by linking to
-//! rustc, driving it programmatically. It has three major differences
+//! rustc, driving it programmatically. It has two major differences
 //! compared to stock `rustc`:
 //!
 //! 1. It injects an arbitrary crate as the standard library, including
-//!    prelude and macros.
+//!    prelude and macros, using rustc's own std_inject pass.
 //!
-//! 2. It disallows linking to *any other crate*.
-//!
-//! 3. It disallows `unsafe` blocks.
-//!
-//!
-
-#![crate_name = "chamber"]
-#![crate_type = "bin"]
-#![crate_type = "rlib"]
+//! 2. It uses lint passes to blacklist unsafe features.
 
 #![feature(globs)]
 

@@ -10,9 +10,6 @@
 
 //! Forbids safety-breaking language features from being used
 
-#![crate_type = "rlib"]
-#![crate_type = "dylib"]
-
 #![feature(phase, plugin_registrar)]
 
 #[phase(plugin, link)] // Load rustc as a plugin to get lint macros

@@ -8,9 +8,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![crate_name = "cbr_baseline"]
-#![crate_type = "rlib"]
-
 extern crate core;
 
 // This is everything but `any` and `intrinsics`.

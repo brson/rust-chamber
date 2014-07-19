@@ -81,7 +81,7 @@ and chambered libraries may be intermixed freely with normal Rust libraries.
 
 Chamber is a simple program and is structured for readability.
 It is a good demonstration of embedding rustc as well as creating rustc plugins.
-See [`src/chamber/lib.rs`](src/chamber/lib.rs) for more technical details.
+See [`src/chamber/lib.rs`](src/chamber/lib.rs).
 
 # Blacklisted language features
 

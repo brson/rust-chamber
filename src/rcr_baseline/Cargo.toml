@@ -7,3 +7,4 @@ authors = [ "Brian Anderson <banderson@mozilla.com>" ]
 [[lib]]
 name = "rcr_baseline"
 path = "lib.rs"
+crate-types = [ "rlib", "dylib" ]
