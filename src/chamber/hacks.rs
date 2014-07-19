@@ -11,6 +11,7 @@
 use rustc::back::link;
 use rustc::driver::config;
 use rustc::driver::session::Session;
+use rustc::driver::config::CrateType;
 use rustc::driver::driver::{collect_crate_metadata, collect_crate_types};
 use rustc::driver::driver::{phase_1_parse_input,
                             phase_3_run_analysis_passes,
@@ -39,7 +40,33 @@ use syntax::parse::token;
 
 use hack_std_inject = std_inject;
 
-// Copied from rustc, ugh
+pub fn parse_crate_types_from_list(crate_types_list_list: Vec<String>) -> Result<Vec<CrateType>, String> {
+
+    use rustc::driver::config::{CrateTypeExecutable, CrateTypeDylib,
+                                CrateTypeRlib, CrateTypeStaticlib};
+    use rustc::driver::config::default_lib_output;
+
+    let mut crate_types: Vec<CrateType> = Vec::new();
+    for unparsed_crate_type in crate_types_list_list.iter() {
+        for part in unparsed_crate_type.as_slice().split(',') {
+            let new_part = match part {
+                "lib"       => default_lib_output(),
+                "rlib"      => CrateTypeRlib,
+                "staticlib" => CrateTypeStaticlib,
+                "dylib"     => CrateTypeDylib,
+                "bin"       => CrateTypeExecutable,
+                _ => {
+                    return Err(format!("unknown crate type: `{}`",
+                                       part));
+                }
+            };
+            crate_types.push(new_part)
+        }
+    }
+
+    return Ok(crate_types);
+}
+
 pub fn monitor(f: proc():Send) {
 
     use syntax::diagnostic;
