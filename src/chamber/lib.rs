@@ -47,9 +47,9 @@ pub fn main() {
 }
 
 pub struct Config {
-    crate_types: Vec<CrateType>,
-    chamber_name: Option<String>,
-    search_paths: Vec<Path>
+    pub crate_types: Vec<CrateType>,
+    pub chamber_name: Option<String>,
+    pub search_paths: Vec<Path>
 }
 
 enum ExeMode {
