@@ -8,22 +8,44 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Rust Chamber. Language-based Sandboxing for Rust.
+//!
+//! Chamber is a Rust compiler. It is implemented by linking to
+//! rustc, driving it programmatically. It has three major differences
+//! compared to stock `rustc`:
+//!
+//! 1. It injects an arbitrary crate as the standard library, including
+//!    prelude and macros.
+//!
+//! 2. It disallows linking to *any other crate*.
+//!
+//! 3. It disallows `unsafe` blocks.
+//!
+//!
+
 #![crate_name = "chamber"]
 #![crate_type = "bin"]
 #![crate_type = "rlib"]
 
 #![feature(globs)]
 
-extern crate chamber_plugin;
-extern crate getopts;
-extern crate rustc;
-extern crate serialize;
+// The Rust parser.
 extern crate syntax;
+// The Rust compiler.
+extern crate rustc;
+
+// The rustc plugins that implement Chamber's language restrictions.
+extern crate chamber_plugin;
+
+extern crate getopts;
+extern crate serialize;
 
 use rustc::driver::config::CrateType;
 use rustc::plugin::load::Plugins;
 use SessOpts = rustc::driver::config::Options;
 
+// Command line interface.
+// Reexported so the source for the `chamber` bin can just call chamber::main().
 pub use driver::main;
 
 mod driver;
@@ -35,7 +57,12 @@ pub static DEFAULT_CHAMBER: &'static str = "rcr_baseline";
 
 /// Configuration for building Rust source against a chamber.
 pub struct Config {
+
+    // The name of the 'chamber' (crate) to link to in place of `std`.
     pub chamber_name: String,
+
+    // Normal rustc arguments.
+
     pub input_file: Path,
     pub crate_types: Vec<CrateType>,
     pub search_paths: Vec<Path>,
@@ -46,15 +73,18 @@ pub struct Config {
 
 /// The main compilation function.
 /// Drives the customized rustc based on a configuration.
+///
+/// Look closely! This is how you drive the Rust compiler
+/// the right way.
 pub fn enchamber(config: Config) -> Result<(), ()> {
 
     use hacks::compile_input;
     use rustc::driver::config::build_configuration;
     use rustc::driver::driver::FileInput;
+    use rustc::driver::session::build_session;
     use syntax::diagnostics::registry::Registry;
 
     party_favors::monitor_for_real(proc() {
-        use rustc::driver::session::build_session;
 
         let ref config = config;
 
