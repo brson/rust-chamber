@@ -77,8 +77,7 @@ Some Rust features make it easy to break memory safety.
 These are turned off.
 
 * `unsafe` blocks
-* foreign items
-* using `#[feature(...)]`
+* `#[feature(...)]`
 
 # TODO
 
