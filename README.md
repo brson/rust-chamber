@@ -81,7 +81,6 @@ These are turned off.
 
 # TODO
 
-* Blacklist feature ungating
 * Upstream rustc API changes to avoid code duplication.
 * Investigate safety of built-in syntax extensions.
 * Fill out baseline chamber.
@@ -89,4 +88,3 @@ These are turned off.
   separate process and detecting the special 'ok' crash conditions
   (stack overflow, double fail).
 * Factor out 'default policy' - BASELINE_CHAMBER, search paths
-* 
