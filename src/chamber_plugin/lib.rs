@@ -26,7 +26,8 @@ use syntax::ast;
 #[plugin_registrar]
 pub fn plugin_registrar(reg: &mut Registry) {
     reg.register_lint_pass(box UnsafeBlockPass);
-    reg.register_lint_pass(box FeatureGatePass);
+    // Needs to allow the gates used by std injection
+    //reg.register_lint_pass(box FeatureGatePass);
 }
 
 
