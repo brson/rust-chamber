@@ -19,6 +19,7 @@ extern crate rustc;
 extern crate syntax;
 
 use syntax::diagnostics::registry::Registry;
+use rustc::back::link::OutputTypeExe;
 use rustc::driver::driver::{compile_input, FileInput};
 use rustc::driver::config::{CrateType, CrateTypeExecutable, CrateTypeDylib,
                             CrateTypeRlib, CrateTypeStaticlib,
@@ -55,7 +56,8 @@ pub struct Config {
     pub chamber_name: Option<String>,
     pub search_paths: Vec<Path>,
     pub out_dir: Option<Path>,
-    pub out_file: Option<Path>
+    pub out_file: Option<Path>,
+    pub sysroot: Option<Path>
 }
 
 enum ExeMode {
@@ -89,6 +91,8 @@ fn parse_config(mut args: Vec<String>) -> ExeMode {
     let out_dir = matches.opt_str("out-dir").map(|o| Path::new(o));
     let out_file = matches.opt_str("o").map(|o| Path::new(o));
 
+    let sysroot = matches.opt_str("sysroot").map(|o| Path::new(o));
+
     let input_file = match matches.free.len() {
         0 => return Help,
         1 => Path::new(matches.free[0].as_slice()),
@@ -101,7 +105,8 @@ fn parse_config(mut args: Vec<String>) -> ExeMode {
         chamber_name: chamber_name,
         search_paths: search_paths,
         out_dir: out_dir,
-        out_file: out_file
+        out_file: out_file,
+        sysroot: sysroot
     })
 }
 
@@ -142,6 +147,7 @@ fn optgroups() -> Vec<OptGroup> {
                                "[bin|lib|rlib|dylib|staticlib]"),
          optopt("o", "", "Write output to <filename>", "FILENAME"),
          optopt( "",  "out-dir", "Write output to compiler-chosen filename in <dir>", "DIR"),
+         optopt("", "sysroot", "Override the system root", "PATH"),
          ]
 }
 
@@ -161,6 +167,8 @@ fn build_session_options(config: &Config) -> SessOpts {
     SessOpts {
         crate_types: config.crate_types.clone(),
         addl_lib_search_paths: RefCell::new(search_paths),
+        maybe_sysroot: config.sysroot.clone(),
+        output_types: vec!(OutputTypeExe),
         .. basic_options()
     }
 }

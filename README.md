@@ -38,6 +38,8 @@ Use Cargo, y'all.
 target/chamber breakme.rs
 ```
 
+*Note: you may need to add `--sysroot=/usr/local`.*
+
 This will create the `breakme` bin.
 The `--crate-type` flag and `crate_type` attribute also work.
 
