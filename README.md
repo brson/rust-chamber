@@ -1,8 +1,8 @@
 # Enter the Rust Chamber
 
-This is a tool for sandboxing code using only the Rust type system.
+This is a tool for sandboxing software using only the Rust type system.
 
-It is not though an endorsement that Rust is suitable for use as a software sandbox.
+It is not though a suggestion that Rust is suitable for use as a sandbox.
 
 
 # Why?
@@ -19,9 +19,9 @@ a term which includes but isn't limited to:
 *A Rust program that cannot use the `unsafe` keyword,
 nor link to any libraries,
 should be able to accomplish nothing more disruptive than spin the CPU,
-trigger `fail!`, or hit the end of the stack.*
+trigger unwinding, or recurse into the end of the stack.*
 
-Chamber creates a controlled environment for fuzzing, attacking, and torturing the compiler.
+Chamber creates a controlled environment for fuzzing, attacking, and torturing the compiler and libraries.
 It provides a framework for attempting to violate Rust's safety guarantees.
 
 
@@ -61,14 +61,18 @@ The above is equivalent to the default rustc behavior plus Chamber's blacklist p
 
 # How it works
 
-Chamber is a light wrapper to rustc that injects custom preludes and blacklists language features.
-A 'chamber' is just a Rust crate that has the very basic 'shape' of the Rust Standard Library;
-primarily, it is a crate with a `prelude` module.
+Chamber is a light wrapper to rustc that injects custom preludes and blacklists language features, including linking to any other crate.
+A 'chamber' is just a Rust crate that has the very basic 'shape' of the Rust Standard Library.
+Primarily, it is a crate with a `prelude` module.
+
+Chambers do not need to be 'freestanding';
+they may link to std,
+and chambered libraries may be intermixed freely with normal Rust libraries.
 
 Rust is pretty sweet.
 
 # TODO
 
-* Feature blacklist plugin.
+* Create blacklist plugin!
 * Upstream rustc API changes to avoid code duplication.
 * Investigate safety of built-in syntax extensions.
