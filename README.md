@@ -24,8 +24,6 @@ trigger `fail!`, or hit the end of the stack.*
 Chamber creates a controlled environment for fuzzing, attacking, and torturing the compiler.
 It provides a framework for attempting to violate Rust's safety guarantees.
 
-Enough of such attempts and maybe Rust *can* be trusted as a sandbox.
-
 
 # Building
 
@@ -39,7 +37,6 @@ target/chamber breakme.rs --sysroot=/usr/local
 ```
 
 This will create the `breakme` bin.
-The `--crate-type` flag and `crate_type` attribute also work.
 
 Chamber comes with a simple 'baseline' chamber, `rcr_baseline`,
 and links to it by default.
