@@ -1,0 +1,12 @@
+[package]
+
+name = "chamber"
+version = "0.1.0"
+authors = [ "Brian Anderson <banderson@mozilla.com>" ]
+
+[[lib]]
+name = "chamber"
+path = "src/chamber/lib.rs"
+
+[dependencies.rcr_baseline]
+path = "src/rcr_baseline/"
