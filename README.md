@@ -61,3 +61,9 @@ A 'chamber' is just a Rust crate that has the very basic 'shape' of the Rust Sta
 primarily, it is a crate with a `prelude` module.
 
 Rust is pretty sweet.
+
+# TODO
+
+* Feature blacklisting.
+* Upstream rustc API changes to avoid code duplication.
+* Investigate safety of built-in syntax extensions.

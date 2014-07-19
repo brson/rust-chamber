@@ -34,7 +34,7 @@ use hacks::compile_input;
 mod std_inject;
 mod hacks;
 
-static BASELINE_CHAMBER: &'static str = "rcr_baseline";
+pub static BASELINE_CHAMBER: &'static str = "rcr_baseline";
 
 pub fn main() {
     let args = os::args();
