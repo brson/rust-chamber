@@ -13,8 +13,42 @@
 
 extern crate core;
 
-pub use core::cmp;
-pub use core::ops;
+// This is everything but `any` and `intrinsics`.
 
-pub mod prelude {
-}
+pub use core::atomics;
+pub use core::bool;
+pub use core::cell;
+pub use core::clone;
+pub use core::cmp;
+pub use core::collections;
+pub use core::default;
+pub use core::failure;
+pub use core::finally;
+pub use core::f32;
+pub use core::f64;
+pub use core::fmt;
+pub use core::int;
+pub use core::iter;
+pub use core::i8;
+pub use core::i16;
+pub use core::i32;
+pub use core::i64;
+pub use core::kinds;
+pub use core::mem;
+pub use core::num;
+pub use core::ops;
+pub use core::option;
+pub use core::prelude;
+pub use core::ptr;
+pub use core::raw;
+pub use core::result;
+pub use core::simd;
+pub use core::slice;
+pub use core::str;
+pub use core::tuple;
+pub use core::ty;
+pub use core::uint;
+pub use core::u8;
+pub use core::u16;
+pub use core::u32;
+pub use core::unit;
