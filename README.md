@@ -16,10 +16,10 @@ a term which includes but isn't limited to:
 * No writing unallocated memory.
 * No data races.
 
-A Rust program that cannot use the `unsafe` keyword,
+*A Rust program that cannot use the `unsafe` keyword,
 nor link to any libraries,
 should be able to accomplish nothing more disruptive than spin the CPU,
-trigger `fail!`, or hit the end of the stack.
+trigger `fail!`, or hit the end of the stack.*
 
 Chamber creates a controlled environment for fuzzing, attacking, and torturing the compiler.
 It provides a framework for attempting to violate Rust's safety guarantees.
