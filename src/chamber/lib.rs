@@ -16,17 +16,25 @@
 
 extern crate getopts;
 extern crate rustc;
+extern crate serialize;
 extern crate syntax;
 
 use syntax::diagnostics::registry::Registry;
 use rustc::back::link::OutputTypeExe;
-use rustc::driver::driver::{compile_input, FileInput};
+use rustc::driver::driver::{FileInput};
 use rustc::driver::config::{CrateType, CrateTypeExecutable, CrateTypeDylib,
                             CrateTypeRlib, CrateTypeStaticlib,
                             default_lib_output, build_configuration};
 use SessOpts = rustc::driver::config::Options;
 use std::os;
 use getopts::{OptGroup, Matches};
+
+use hacks::compile_input;
+
+mod std_inject;
+mod hacks;
+
+static BASELINE_CHAMBER: &'static str = "rcr_baseline";
 
 pub fn main() {
     let args = os::args();
@@ -161,8 +169,15 @@ fn build_session_options(config: &Config) -> SessOpts {
     use rustc::driver::config::basic_options;
     use std::cell::RefCell;
 
+    let mut search_paths = config.search_paths.clone();
+
+    // Add some conveniences
+    search_paths.push_all([Path::new("."),
+                           Path::new("./target"),
+                           Path::new("./target/deps")]);
+
     // Convert from Vec<T> to HashSet<T>
-    let search_paths = config.search_paths.clone().move_iter().collect();
+    let search_paths = search_paths.move_iter().collect();
 
     SessOpts {
         crate_types: config.crate_types.clone(),
@@ -192,7 +207,9 @@ pub fn enchamber(config: Config) -> Result<(), ()> {
         let ref out_dir = config.out_dir;
         let ref out_file = config.out_file;
 
-        compile_input(sess, cfg, input_file, out_dir, out_file);
+        let chamber_name = config.chamber_name.clone().or(Some(BASELINE_CHAMBER.to_string()));
+
+        compile_input(sess, cfg, input_file, out_dir, out_file, chamber_name);
     })
 }
 
@@ -200,89 +217,9 @@ fn monitor_for_real(f: proc():Send) -> Result<(), ()> {
     use std::task;
 
     let res = task::try(proc() {
-        monitor(f)
+        hacks::monitor(f)
     });
 
     if res.is_ok() { Ok(()) } else { Err(()) }
 }
 
-// Copied from rustc, ugh
-fn monitor(f: proc():Send) {
-
-    use syntax::diagnostic;
-    use syntax::diagnostic::Emitter;
-    use std::any::AnyRefExt;
-    use std::io;
-    use std::task::TaskBuilder;
-
-    // FIXME: This is a hack for newsched since it doesn't support split stacks.
-    // rustc needs a lot of stack! When optimizations are disabled, it needs
-    // even *more* stack than usual as well.
-    #[cfg(rtopt)]
-    static STACK_SIZE: uint = 6000000;  // 6MB
-    #[cfg(not(rtopt))]
-    static STACK_SIZE: uint = 20000000; // 20MB
-
-    let (tx, rx) = channel();
-    let w = io::ChanWriter::new(tx);
-    let mut r = io::ChanReader::new(rx);
-
-    let mut task = TaskBuilder::new().named("rustc").stderr(box w);
-
-    // FIXME: Hacks on hacks. If the env is trying to override the stack size
-    // then *don't* set it explicitly.
-    if os::getenv("RUST_MIN_STACK").is_none() {
-        task = task.stack_size(STACK_SIZE);
-    }
-
-    match task.try(f) {
-        Ok(()) => { /* fallthrough */ }
-        Err(value) => {
-            // Task failed without emitting a fatal diagnostic
-            if !value.is::<diagnostic::FatalError>() {
-                let mut emitter = diagnostic::EmitterWriter::stderr(diagnostic::Auto, None);
-
-                // a .span_bug or .bug call has already printed what
-                // it wants to print.
-                if !value.is::<diagnostic::ExplicitBug>() {
-                    emitter.emit(
-                        None,
-                        "unexpected failure",
-                        None,
-                        diagnostic::Bug);
-                }
-
-                static BUG_REPORT_URL: &'static str =
-                    "http://doc.rust-lang.org/complement-bugreport.html";
-
-                let xs = [
-                    "the compiler hit an unexpected failure path. this is a bug.".to_string(),
-                    format!("we would appreciate a bug report: {}",
-                            BUG_REPORT_URL),
-                    "run with `RUST_BACKTRACE=1` for a backtrace".to_string(),
-                ];
-                for note in xs.iter() {
-                    emitter.emit(None, note.as_slice(), None, diagnostic::Note)
-                }
-
-                match r.read_to_string() {
-                    Ok(s) => println!("{}", s),
-                    Err(e) => {
-                        emitter.emit(None,
-                                     format!("failed to read internal \
-                                              stderr: {}",
-                                             e).as_slice(),
-                                     None,
-                                     diagnostic::Error)
-                    }
-                }
-            }
-
-            // Fail so the process returns a failure code, but don't pollute the
-            // output with some unnecessary failure messages, we've already
-            // printed everything that we needed to.
-            io::stdio::set_stderr(box io::util::NullWriter);
-            fail!();
-        }
-    }
-}
