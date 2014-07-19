@@ -51,7 +51,8 @@ By default Chamber will look in `.`, `./target`, and `./target/deps`, in that or
 to find chambers, as well as the normal rustc search paths.
 The search path can be augmented with `-L`.
 
-The Rust Standard Library itself is a chamber:
+The Rust Standard Library itself is a chamber.
+This is equivalent to the default rustc behavior plus Chamber's blacklist plugin:
 
 ```
 target/chamber breakme.rs --sysroot=/usr/local --chamber std
@@ -69,6 +70,6 @@ Rust is pretty sweet.
 
 # TODO
 
-* Feature blacklisting.
+* Feature blacklist plugin.
 * Upstream rustc API changes to avoid code duplication.
 * Investigate safety of built-in syntax extensions.
