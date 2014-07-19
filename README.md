@@ -39,7 +39,7 @@ target/chamber breakme.rs --sysroot=/usr/local
 This will create the `breakme` bin.
 
 Chamber comes with a simple 'baseline' chamber, `rcr_baseline`,
-and links to it by default.
+and links to it by default (warning: `rcr_baseline` currently provides *no features*).
 To specify a different chamber,
 pass its name behind the `--chamber` flag:
 
@@ -51,14 +51,13 @@ By default Chamber will look in `.`, `./target`, and `./target/deps`, in that or
 to find chambers, as well as the normal rustc search paths.
 The search path can be augmented with `-L`.
 
-The Rust Standard Library itself is a chamber.
-This is equivalent to the default rustc behavior plus Chamber's blacklist plugin:
+The Rust Standard Library itself is a chamber:
 
 ```
 target/chamber breakme.rs --sysroot=/usr/local --chamber std
 ```
 
-Warning: `rcr_baseline` currently provides *no features*.
+The above is equivalent to the default rustc behavior plus Chamber's blacklist plugin.
 
 # How it works
 
