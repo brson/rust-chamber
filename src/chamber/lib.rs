@@ -59,9 +59,9 @@ pub fn main() {
 }
 
 pub struct Config {
+    pub chamber_name: String,
     pub input_file: Path,
     pub crate_types: Vec<CrateType>,
-    pub chamber_name: Option<String>,
     pub search_paths: Vec<Path>,
     pub out_dir: Option<Path>,
     pub out_file: Option<Path>,
@@ -93,13 +93,14 @@ fn parse_config(mut args: Vec<String>) -> ExeMode {
         Ok(c) => c,
         Err(s) => return ParseError(s)
     };
-    let chamber_name = matches.opt_str("chamber");
     let search_paths = matches.opt_strs("L").iter().map(|s| Path::new(s.as_slice())).collect();
 
     let out_dir = matches.opt_str("out-dir").map(|o| Path::new(o));
     let out_file = matches.opt_str("o").map(|o| Path::new(o));
 
     let sysroot = matches.opt_str("sysroot").map(|o| Path::new(o));
+
+    let chamber_name = matches.opt_str("chamber").unwrap_or(BASELINE_CHAMBER.to_string());
 
     let input_file = match matches.free.len() {
         0 => return Help,
@@ -108,9 +109,9 @@ fn parse_config(mut args: Vec<String>) -> ExeMode {
     };
 
     Run(Config {
+        chamber_name: chamber_name,
         input_file: input_file,
         crate_types: crate_types,
-        chamber_name: chamber_name,
         search_paths: search_paths,
         out_dir: out_dir,
         out_file: out_file,
@@ -207,7 +208,7 @@ pub fn enchamber(config: Config) -> Result<(), ()> {
         let ref out_dir = config.out_dir;
         let ref out_file = config.out_file;
 
-        let chamber_name = config.chamber_name.clone().or(Some(BASELINE_CHAMBER.to_string()));
+        let chamber_name = Some(config.chamber_name.clone());
 
         compile_input(sess, cfg, input_file, out_dir, out_file, chamber_name);
     })
