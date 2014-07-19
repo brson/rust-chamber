@@ -1,12 +1,13 @@
 # Enter the Rust Chamber
 
-This is a compiler that sandboxes software using only the Rust type system.
+This is a compiler that sandboxes software using only the Rust language.
 
 Please do not use Rust as a language-based sandbox.
 
-# Why?
 
-The first principle of Rust is that code that does not say the keyword 'unsafe' cannot crash (modulo sunspots),
+## Why do this?
+
+The first principle of Rust is that code that does not say the keyword `unsafe` cannot crash (modulo sunspots),
 that safe Rust must be *memory safe*,
 a term which includes but isn't limited to:
 
@@ -15,21 +16,21 @@ a term which includes but isn't limited to:
 * No writing unallocated memory.
 * No data races.
 
-*A Rust program that cannot use the `unsafe` keyword,
-nor link to any libraries,
-should be able to accomplish nothing more disruptive than spin the CPU,
+Because Rust is so all about memory safety,
+*Rust code that has no unsafe blocks and that has no access to libraries
+should be able to accomplish little more disruptive than spin the CPU,
 trigger unwinding, or recurse into the end of the stack.*
 
 Chamber creates a controlled environment for fuzzing, attacking, and torturing the compiler and libraries.
 It provides a framework for attempting to violate Rust's safety guarantees.
 
 
-# Building
+## Building
 
-`cargo build`.
+`cargo build`
 
 
-# Running
+## Running
 
 ```
 target/chamber breakme.rs --sysroot=/usr/local
@@ -47,7 +48,7 @@ pass its name behind the `--chamber` flag:
 target/chamber breakme.rs --sysroot=/usr/local --chamber rcr_custom
 ```
 
-By default Chamber will look in `.`, `./target`, and `./target/deps`, in that order,
+By default Chamber will look in `.`, `./target`, and `./target/deps`,
 to find chambers, as well as the normal rustc search paths.
 The search path can be augmented with `-L`.
 
@@ -59,31 +60,30 @@ target/chamber breakme.rs --sysroot=/usr/local --chamber std
 
 The above is equivalent to the default rustc behavior plus Chamber's blacklist plugin.
 
-# How it works
 
-Chamber is a Rust compiler.
-It works by linking to rustc directly and augmenting its behavior.
-It has a few major differences
-compared to stock `rustc`:
+## How it works
+
+Chamber is a customized Rust compiler.
+It links to rustc directly to augment its behavior.
+Compared to stock `rustc` there are two major differences:
 
 1. It injects an arbitrary crate as the standard library, including
    prelude and macros. This is called a 'chamber'.
 
-2. It disallows linking to *any other crate*.
-
-3. It disallows `unsafe` blocks.
-
-4. It disallows enabling experimental features ("feature gates").
+2. It uses lint passes to blacklist unsafe features, including
+   linking to any other crate.
 
 Chambers do not need to be 'freestanding';
 they may link to std,
 and chambered libraries may be intermixed freely with normal Rust libraries.
 
 Chamber is a simple program and is structured for readability.
-It is a good demonstration of embedding rustc as well as creating rustc plugins.
+It is a good demonstration of embedding rustc, as well as creating rustc plugins,
+and incorporating both into Cargo packages.
 See [`src/chamber/lib.rs`](src/chamber/lib.rs).
 
-# Blacklisted language features
+
+## Blacklisted language features
 
 Some Rust features make it easy to break memory safety.
 These are turned off.
@@ -92,21 +92,33 @@ These are turned off.
 * `unsafe` blocks
 * `#[feature(...)]`
 
-# Chambers
 
-TODO
+## Chambers
 
-# What Rust does and does not promise
+Only one chamber exists right now.
 
-TODO: looping, unwinding, stack overflow, memory leaks, abort
+* rcr_baseline. This is a chamber that others can build off of. It
+  exposes all of the API's from the core library except for
+  `core::any`, which has potential issues with predicting type hashes,
+  and for `core::intrinsics`, which I didn't want to look through
+  carefully, but mostly can't be called anyway.
 
-# TODO
+
+## What Rust does and does not promise
+
+TODO: looping, unwinding, stack overflow, memory leaks, abort, traps,
+OS scheduling
+
+
+## TODO
 
 * Upstream rustc API changes to avoid code duplication.
 * Investigate safety of built-in syntax extensions.
 * Factor out 'default policy' - BASELINE_CHAMBER, search paths
+* Add some sysroot guessing.
 * Fix feature gate pass
 * Add conveniences API's for compiling .rs, putting the binary into a
   separate process and detecting the special 'ok' crash conditions
   (stack overflow, double fail).
 * Investigate impact of native rt injection.
+* Add more chambers.
