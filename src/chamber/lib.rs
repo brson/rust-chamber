@@ -44,8 +44,6 @@ mod hacks;
 mod std_inject; // also a hack
 mod party_favors; // utilities
 
-pub static DEFAULT_CHAMBER: &'static str = "rcr_baseline";
-
 /// Configuration for building Rust source against a chamber.
 pub struct Config {
 
@@ -135,14 +133,8 @@ fn build_session_options(config: &Config) -> Options {
     use rustc::driver::config::basic_options;
     use std::cell::RefCell;
 
-    let mut search_paths = config.search_paths.clone();
-
-    // Add some conveniences
-    search_paths.push_all([Path::new("."),
-                           Path::new("./target"),
-                           Path::new("./target/deps")]);
-
     // Convert from Vec<T> to HashSet<T> like magic.
+    let search_paths = config.search_paths.clone();
     let search_paths = search_paths.move_iter().collect();
 
     Options {

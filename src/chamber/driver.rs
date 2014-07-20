@@ -8,8 +8,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use {Config, enchamber, DEFAULT_CHAMBER};
+use {Config, enchamber};
 use getopts::OptGroup;
+
+pub static DEFAULT_CHAMBER: &'static str = "rcr_baseline";
 
 pub fn main() {
     use std::os;
@@ -17,6 +19,7 @@ pub fn main() {
     let args = os::args();
     let exit_code = match parse_config(args) {
         Run(config) => {
+            let config = merge_config_defaults(config);
             match enchamber(config) {
                 Ok(_) => 0,
                 Err(_) => 1
@@ -85,6 +88,21 @@ fn parse_config(mut args: Vec<String>) -> ExeMode {
         out_file: out_file,
         sysroot: sysroot
     })
+}
+
+fn merge_config_defaults(mut config: Config) -> Config {
+
+    // Add some conveniences so cargo'd chambers can be found.
+    config.search_paths.push_all([Path::new("."),
+                                  Path::new("./target"),
+                                  Path::new("./target/deps")]);
+
+    // Hope that rustc is installed to the usual place
+    if config.sysroot.is_none() {
+        config.sysroot = Some(Path::new("/usr/local"));
+    }
+
+    config
 }
 
 fn optgroups() -> Vec<OptGroup> {

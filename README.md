@@ -33,10 +33,11 @@ It provides a framework for attempting to violate Rust's safety guarantees.
 ## Running
 
 ```
-target/chamber breakme.rs --sysroot=/usr/local
+target/chamber breakme.rs
 ```
 
-This will create the `breakme` bin.
+This will create the `breakme` bin. (If you get an error about not finding std
+you may need to pass the `--sysroot` flag).
 
 Chamber comes with a simple 'baseline' chamber, `rcr_baseline`,
 which reexports nearly all of the Rust Core Library,
@@ -45,7 +46,7 @@ To specify a different chamber,
 pass its name behind the `--chamber` flag:
 
 ```
-target/chamber breakme.rs --sysroot=/usr/local --chamber rcr_custom
+target/chamber breakme.rs --chamber rcr_custom
 ```
 
 By default Chamber will look in `.`, `./target`, and `./target/deps`,
@@ -55,7 +56,7 @@ The search path can be augmented with `-L`.
 The stock Rust Standard Library itself is a chamber:
 
 ```
-target/chamber breakme.rs --sysroot=/usr/local --chamber std
+target/chamber breakme.rs --chamber std
 ```
 
 The above is equivalent to the default rustc behavior plus Chamber's blacklist plugin.
@@ -99,23 +100,20 @@ Only one chamber exists right now.
 
 * rcr_baseline. This is a chamber that others can build off of. It
   exposes all of the API's from the core library except for
-  `core::any`, which has potential issues with predicting type hashes,
-  and for `core::intrinsics`, which I didn't want to look through
+  `core::any`, which has potential issues with forging type hashes,
+  and `core::intrinsics`, which I didn't want to look through
   carefully, but mostly can't be called anyway.
 
 
 ## What Rust does and does not promise
 
-TODO: looping, unwinding, stack overflow, memory leaks, abort, traps,
-OS scheduling
+TODO: looping, unwinding, stack overflow, memory leaks, abort, oom
 
 
 ## TODO
 
 * Upstream rustc API changes to avoid code duplication.
 * Investigate safety of built-in syntax extensions.
-* Factor out 'default policy' - BASELINE_CHAMBER, search paths
-* Add some sysroot guessing.
 * Fix feature gate pass
 * Add conveniences API's for compiling .rs, putting the binary into a
   separate process and detecting the special 'ok' crash conditions
