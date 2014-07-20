@@ -57,21 +57,22 @@ pub fn set_params(stdname: String) {
 /// Forbids `unsafe` blocks
 struct UnsafeBlockPass;
 
-declare_lint!(UNSAFE_BLOCK_LINT, Forbid,
+// NB: Named CH_ because rustc has this same pass.
+declare_lint!(CH_UNSAFE_BLOCK, Forbid,
               "`unsafe` blocks")
 
 impl LintPass for UnsafeBlockPass {
     fn get_lints(&self) -> LintArray {
-        lint_array!(UNSAFE_BLOCK_LINT)
+        lint_array!(CH_UNSAFE_BLOCK)
     }
 
-    fn check_block(&mut self, ctx: &Context, block: &ast::Block) {
-
-        match block.rules {
-            ast::UnsafeBlock(_) => {
-                ctx.tcx.sess.span_err(block.span, "chamber: `unsafe` block");
+    fn check_expr(&mut self, ctx: &Context, e: &ast::Expr) {
+        match e.node {
+            // Don't warn about generated blocks, that'll just pollute the output.
+            ast::ExprBlock(ref blk) if blk.rules == ast::UnsafeBlock(ast::UserProvided) => {
+                ctx.span_lint(CH_UNSAFE_BLOCK, e.span, "chamber: `unsafe` block");
             }
-            ast::DefaultBlock => ()
+            _ => ()
         }
     }
 }
@@ -79,12 +80,12 @@ impl LintPass for UnsafeBlockPass {
 /// Forbids using the `#[feature(...)]` attribute
 struct FeatureGatePass;
 
-declare_lint!(FEATURE_GATE_LINT, Forbid,
+declare_lint!(CH_FEATURE_GATE, Forbid,
               "enabling experimental features")
 
 impl LintPass for FeatureGatePass {
     fn get_lints(&self) -> LintArray {
-        lint_array!(FEATURE_GATE_LINT)
+        lint_array!(CH_FEATURE_GATE)
     }
 
     fn check_attribute(&mut self, ctx: &Context, attr: &ast::Attribute) {
@@ -92,41 +93,41 @@ impl LintPass for FeatureGatePass {
         use syntax::attr;
 
         if attr::contains_name(&[attr.node.value], "feature") {
-            ctx.tcx.sess.span_err(attr.span, "chamber: feature gate");
+            ctx.span_lint(CH_FEATURE_GATE, attr.span, "chamber: feature gate");
         }
     }
 }
 
 /// Enforces Chamber's restrictions on `extern crate`.
 struct CrateLimitPass {
-    stdname: String,
-    seen: uint
+    stdname: String
 }
 
 impl CrateLimitPass {
     pub fn new(stdname: String) -> CrateLimitPass {
-        CrateLimitPass { stdname: stdname, seen: 0 }
+        CrateLimitPass { stdname: stdname }
     }
 }
 
-declare_lint!(CRATE_LIMIT_LINT, Forbid,
+declare_lint!(CH_CRATE_LIMIT, Forbid,
               "enforces")
 
 impl LintPass for CrateLimitPass {
     fn get_lints(&self) -> LintArray {
-        lint_array!(FEATURE_GATE_LINT)
+        lint_array!(CH_CRATE_LIMIT)
     }
 
     fn check_view_item(&mut self, ctx: &Context, item: &ast::ViewItem) {
         match item.node {
             ast::ViewItemExternCrate(std, Some((ref name, _)), _) => {
-                // `std` is the value used in code
+                // This is the name used in the code.
                 if std.as_str() != "std" {
-                    ctx.tcx.sess.span_err(item.span, "chamber: incorrect ident for std");
+                    ctx.span_lint(CH_CRATE_LIMIT, item.span, "chamber: incorrect ident for std");
                 }
 
+                // This is the name of the crate we're calling 'std'.
                 if name.get() != self.stdname.as_slice() {
-                    ctx.tcx.sess.span_err(item.span, "chamber: incorrect name for std");
+                    ctx.span_lint(CH_CRATE_LIMIT, item.span, "chamber: incorrect name for std");
                 }
             }
             ast::ViewItemExternCrate(name, None, _) => {
@@ -135,7 +136,7 @@ impl LintPass for CrateLimitPass {
                     // code to the native crate. Bad.
                 } else {
                     // std_inject does not emit this pattern
-                    ctx.tcx.sess.span_err(item.span, "chamber: incorect std `extern crate` form");
+                    ctx.span_lint(CH_CRATE_LIMIT, item.span, "chamber: incorect std `extern crate` form");
                 }
             }
             ast::ViewItemUse(_) => ( /* nbd */ )

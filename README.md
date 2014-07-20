@@ -7,19 +7,9 @@ Please do not use Rust as a language-based sandbox.
 
 ## Why do this?
 
-The first principle of Rust is that code that does not say the keyword `unsafe` cannot crash (modulo sunspots),
-that safe Rust must be *memory safe*,
-a term which includes but isn't limited to:
-
-* No use after free.
-* No reading uninitialized memory.
-* No writing unallocated memory.
-* No data races.
-
 Because Rust is so all about memory safety,
 *Rust code that has no unsafe blocks and that has no access to libraries
-should be able to accomplish little more disruptive than spin the CPU,
-trigger unwinding, or recurse into the end of the stack.*
+should have a tightly restricted ability to cause meyhem.*
 
 Chamber creates a controlled environment for fuzzing, attacking, and torturing the compiler and libraries.
 It provides a framework for attempting to violate Rust's safety guarantees.
@@ -120,4 +110,3 @@ TODO: looping, unwinding, stack overflow, memory leaks, abort, oom
   (stack overflow, double fail).
 * Investigate impact of native rt injection.
 * Add more chambers.
-* Fix the way the lints raise errors.
