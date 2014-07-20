@@ -122,7 +122,7 @@ pub fn enchamber(config: Config) -> Result<(), ()> {
         let chamber_name = Some(config.chamber_name.clone());
 
         // Our custom plugins that we want to run.
-        let plugins = get_chamber_plugins();
+        let plugins = get_chamber_plugins(config);
         
         compile_input(sess, cfg, input_file, out_dir, out_file, chamber_name, plugins);
     })
@@ -170,7 +170,11 @@ fn build_session_options(config: &Config) -> Options {
     }
 }
 
-fn get_chamber_plugins() -> Plugins {
+fn get_chamber_plugins(config: &Config) -> Plugins {
+
+    // Configure 
+    chamber_plugin::set_params(config.chamber_name.clone());
+
     Plugins {
         macros: vec!(),
         registrars: vec!(chamber_plugin::plugin_registrar)
