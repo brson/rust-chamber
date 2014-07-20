@@ -172,7 +172,8 @@ fn build_session_options(config: &Config) -> Options {
 
 fn get_chamber_plugins(config: &Config) -> Plugins {
 
-    // Configure 
+    // HACK: Configure the plugins via local_data since
+    // there's no way to pass it through the plugin registrar.
     chamber_plugin::set_params(config.chamber_name.clone());
 
     Plugins {

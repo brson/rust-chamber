@@ -10,7 +10,7 @@
 
 //! Forbids safety-breaking language features from being used
 
-#![feature(phase, plugin_registrar)]
+#![feature(phase)]
 
 #[phase(plugin, link)] // Load rustc as a plugin to get lint macros
 extern crate rustc;
@@ -20,6 +20,29 @@ use rustc::lint::{Context, LintPass, LintArray};
 use rustc::plugin::Registry;
 use syntax::ast;
 
+pub fn plugin_registrar(reg: &mut Registry) {
+
+    // Forbid unsafe blocks.
+    reg.register_lint_pass(box UnsafeBlockPass);
+
+    // FIXME: Needs to allow the gates used by std injection
+    //reg.register_lint_pass(box FeatureGatePass);
+
+    // Temporary hack to get around limitations in plugin API.
+    // This plugin needs to know which name we're using for std.
+    // It gets it from local_data.
+    match get_params() {
+        Some(stdname) => {
+            // Only allow importing the chamber crate and nothing else
+            reg.register_lint_pass(box CrateLimitPass::new(stdname));
+        }
+        None => {
+            // This is probably not intentional.
+            fail!("can't get arguments for crate limit");
+        }
+    }
+}
+
 local_data_key!(key_params: String)
 
 pub fn get_params() -> Option<String> {
@@ -28,26 +51,6 @@ pub fn get_params() -> Option<String> {
 
 pub fn set_params(stdname: String) {
     key_params.replace(Some(stdname));
-}
-
-#[plugin_registrar]
-pub fn plugin_registrar(reg: &mut Registry) {
-    reg.register_lint_pass(box UnsafeBlockPass);
-    // Needs to allow the gates used by std injection
-    //reg.register_lint_pass(box FeatureGatePass);
-
-    // Temporary hack to get around limitations in plugin API.
-    // This plugin needs to know which name we're using for std.
-    // It gets it from local_data.
-    match get_params() {
-        Some(stdname) => {
-            reg.register_lint_pass(box CrateLimitPass::new(stdname));
-        }
-        None => {
-            // This is probably not intentional.
-            fail!("can't get arguments for crate limit");
-        }
-    }
 }
 
 
