@@ -13,4 +13,4 @@
 
 extern crate chamber;
 
-fn main() { chamber::main() }
+pub fn main() { chamber::main() }

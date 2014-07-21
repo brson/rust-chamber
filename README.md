@@ -9,7 +9,7 @@ Please do not use Rust as a language-based sandbox.
 
 Because Rust is so all about memory safety,
 *Rust code that has no unsafe blocks and that has no access to libraries
-should have a tightly restricted ability to cause meyhem.*
+has severely reduced ability to cause meyhem.*
 
 Chamber creates a controlled environment for fuzzing, attacking, and torturing the compiler and libraries.
 It provides a framework for attempting to violate Rust's safety guarantees.
