@@ -46,7 +46,7 @@ enum ExeMode {
 
 fn parse_config(mut args: Vec<String>) -> ExeMode {
 
-    use hacks::parse_crate_types_from_list;
+    use rustc::driver::config::parse_crate_types_from_list;
     use getopts::*;
 
     let _ = args.shift().unwrap();

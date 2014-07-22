@@ -40,8 +40,6 @@ use rustc::driver::config::Options;
 pub use driver::main;
 
 mod driver;
-mod hacks;
-mod std_inject; // also a hack
 mod party_favors; // utilities
 
 /// Configuration for building Rust source against a chamber.
@@ -66,9 +64,8 @@ pub struct Config {
 /// Look closely! This is how you drive the Rust compiler properly.
 pub fn enchamber(config: Config) -> Result<(), ()> {
 
-    use hacks::compile_input;
     use rustc::driver::config::build_configuration;
-    use rustc::driver::driver::FileInput;
+    use rustc::driver::driver::{compile_input, FileInput};
     use rustc::driver::session::build_session;
     use syntax::diagnostics::registry::Registry;
 
@@ -115,14 +112,10 @@ pub fn enchamber(config: Config) -> Result<(), ()> {
         let ref out_dir = config.out_dir;
         let ref out_file = config.out_file;
 
-        // The name of the library to use for std injection,
-        // which we call a 'chamber'.
-        let chamber_name = Some(config.chamber_name.clone());
-
         // Our custom plugins that we want to run.
         let plugins = get_chamber_plugins(config);
         
-        compile_input(sess, cfg, input_file, out_dir, out_file, chamber_name, plugins);
+        compile_input(sess, cfg, input_file, out_dir, out_file, Some(plugins));
     })
 }
 
@@ -155,6 +148,9 @@ fn build_session_options(config: &Config) -> Options {
 
         // Output a final binary. rustc will output nothing by default.
         output_types: vec!(OutputTypeExe),
+
+        // The name of the library we'll be using as 'std', the 'chamber'.
+        alt_std_name: Some(config.chamber_name.clone()),
 
         // Don't try to fill out all of `Options` by hand.
         // Use this prototype!
