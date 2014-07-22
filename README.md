@@ -102,7 +102,6 @@ TODO: looping, unwinding, stack overflow, memory leaks, abort, oom
 
 ## TODO
 
-* Upstream rustc API changes to avoid code duplication.
 * Investigate safety of built-in syntax extensions.
 * Fix feature gate pass
 * Add conveniences API's for compiling .rs, putting the binary into a
