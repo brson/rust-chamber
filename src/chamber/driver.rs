@@ -8,10 +8,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+// Command line processing for Chamber
+
 use {Config, enchamber};
 use getopts::OptGroup;
 
-pub static DEFAULT_CHAMBER: &'static str = "rcr_baseline";
+static DEFAULT_CHAMBER: &'static str = "rcr_baseline";
 
 pub fn main() {
     use std::os;
@@ -47,7 +49,7 @@ enum ExeMode {
 fn parse_config(mut args: Vec<String>) -> ExeMode {
 
     use rustc::driver::config::parse_crate_types_from_list;
-    use getopts::*;
+    use getopts::{getopts};
 
     let _ = args.shift().unwrap();
 
@@ -80,8 +82,8 @@ fn parse_config(mut args: Vec<String>) -> ExeMode {
     };
 
     Run(Config {
-        chamber_name: chamber_name,
         input_file: input_file,
+        chamber_name: chamber_name,
         crate_types: crate_types,
         search_paths: search_paths,
         out_dir: out_dir,
@@ -107,7 +109,7 @@ fn merge_config_defaults(mut config: Config) -> Config {
 
 fn optgroups() -> Vec<OptGroup> {
 
-    use getopts::*;
+    use getopts::{optflag, optopt, optmulti};
 
     vec![optflag("h", "help", "Display this message"),
          optopt("", "chamber",

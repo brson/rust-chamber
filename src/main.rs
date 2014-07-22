@@ -13,4 +13,4 @@
 
 extern crate chamber;
 
-pub fn main() { chamber::main() }
+pub fn main() { chamber::driver::main() }

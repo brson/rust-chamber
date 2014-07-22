@@ -8,16 +8,3 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-// rustc's monitor uses task failure for process error reporting
-// (it lets rustc crash). This wraps that behavior with something nicer.
-pub fn monitor_for_real(f: proc():Send) -> Result<(), ()> {
-    use rustc::driver::monitor;
-    use std::task;
-
-    let res = task::try(proc() {
-        monitor(f)
-    });
-
-    if res.is_ok() { Ok(()) } else { Err(()) }
-}
-

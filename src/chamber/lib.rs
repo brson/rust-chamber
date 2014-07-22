@@ -19,8 +19,10 @@
 //!    prelude and macros, using rustc's own std_inject pass.
 //!
 //! 2. It uses lint passes to blacklist unsafe features.
+//!
+//! This file is written to clearly demonstrate how to embed
+//! the Rust compiler.
 
-#![feature(globs)]
 
 extern crate syntax; // The Rust parser.
 extern crate rustc;  // The Rust compiler.
@@ -28,34 +30,34 @@ extern crate rustc;  // The Rust compiler.
 // The rustc plugins that implement Chamber's language restrictions.
 extern crate chamber_plugin;
 
+// The stock command line parsing lib.
 extern crate getopts;
-extern crate serialize;
 
+// Just a few types needed in top level declarations.
 use rustc::driver::config::CrateType;
 use rustc::plugin::load::Plugins;
 use rustc::driver::config::Options;
 
-// Command line interface.
-// Reexported so the source for the `chamber` bin can just call chamber::main().
-pub use driver::main;
+// The command line interface, including `main`.
+pub mod driver;
 
-mod driver;
-mod party_favors; // utilities
 
 /// Configuration for building Rust source against a chamber.
 pub struct Config {
+
+    // The crate source to 'enchamber' (compile).
+    pub input_file: Path,
 
     // The name of the 'chamber' (crate) to link to in place of `std`.
     pub chamber_name: String,
 
     // Normal rustc arguments.
 
-    pub input_file: Path,
-    pub crate_types: Vec<CrateType>,
-    pub search_paths: Vec<Path>,
-    pub out_dir: Option<Path>,
-    pub out_file: Option<Path>,
-    pub sysroot: Option<Path>
+    pub crate_types: Vec<CrateType>, // --crate-type
+    pub search_paths: Vec<Path>,     // -L
+    pub out_dir: Option<Path>,       // --out-dir
+    pub out_file: Option<Path>,      // --out-file, -o
+    pub sysroot: Option<Path>        // --sysroot
 }
 
 /// The main compilation function.
@@ -66,43 +68,49 @@ pub fn enchamber(config: Config) -> Result<(), ()> {
 
     use rustc::driver::config::build_configuration;
     use rustc::driver::driver::{compile_input, FileInput};
-    use rustc::driver::session::build_session;
+    use rustc::driver::session::{Session, build_session};
+    use syntax::ast;
     use syntax::diagnostics::registry::Registry;
 
     // rustc was designed in another era. It's error handling mechanism
     // involves logging to somewhere and then eventually calling `fail!`.
+    // Since rustc is also prone to ICEing, you really must put it into
+    // it's own task to run it reliably (score 1 for task isolation and
+    // recovery).
     //
     // The `monitor_for_real` fn creates a new task with a properly
     // configured environment, calls a closure in which to run the
     // compiler, then monitors for failure.
     //
-    // It is a thin wrapper around rustc`s `monitor` function (which does not)
-    // intercept the failure. `monitor` does ugly stuff that you don't
-    // want to do, like configure the stack size correctly.
-    party_favors::monitor_for_real(proc() {
+    // It is a thin wrapper around rustc`s `monitor` function (which
+    // does not intercept the failure - rustc essentially crashes on
+    // error). `monitor` does ugly stuff that you don't want to do,
+    // like configure rustc's surprisingly complex error handling and
+    // doing something useful with ICE's.
+    monitor_for_real(proc() {
 
         // This is our own application configuration. We're going to
-        // translate it to rustc's (supremely complex) configuration.
+        // translate it to rustc's (moderately complex) configuration.
         let ref config = config;
 
         // Build the `Options` struct from our own configuration.
         // `Options` provides the configuration for constructing `Session`,
         // which is the context to run the compiler pipeline one time.
-        let sopts = build_session_options(config);
+        let sopts: Options = build_session_options(config);
 
         // Create the "diagnostics registry". This is what
         // maintains error codes and extended error documentation.
-        let registry = Registry::new(rustc::DIAGNOSTICS);
+        let registry: Registry = Registry::new(rustc::DIAGNOSTICS);
 
         // Create the `Session` from the `Options`.
         // The name of the source file provided here is only to inform
         // debuginfo generation AFAICT.
         let source = config.input_file.clone();
-        let sess = build_session(sopts, Some(source), registry);
+        let sess: Session = build_session(sopts, Some(source), registry);
 
         // Builds the set of `#[cfg(...)]` idents in effect, combining
         // defaults with those derived from `Session` options.
-        let cfg = build_configuration(&sess);
+        let cfg: ast::CrateConfig = build_configuration(&sess);
 
         // This source code comes from a file (`FileInput`),
         // not in memory (`StrInput`).
@@ -113,7 +121,7 @@ pub fn enchamber(config: Config) -> Result<(), ()> {
         let ref out_file = config.out_file;
 
         // Our custom plugins that we want to run.
-        let plugins = get_chamber_plugins(config);
+        let plugins: Plugins = get_chamber_plugins(config);
         
         compile_input(sess, cfg, input_file, out_dir, out_file, Some(plugins));
     })
@@ -169,3 +177,17 @@ fn get_chamber_plugins(config: &Config) -> Plugins {
         registrars: vec!(chamber_plugin::plugin_registrar)
     }
 }
+
+// rustc's monitor uses task failure for process error reporting
+// (it lets rustc crash). This wraps that behavior with something nicer.
+pub fn monitor_for_real(f: proc():Send) -> Result<(), ()> {
+    use rustc::driver::monitor;
+    use std::task;
+
+    let res = task::try(proc() {
+        monitor(f)
+    });
+
+    if res.is_ok() { Ok(()) } else { Err(()) }
+}
+
