@@ -134,8 +134,8 @@ fn build_session_options(config: &Config) -> Options {
     use rustc::driver::config::basic_options;
     use std::cell::RefCell;
 
-    // Convert from Vec<T> to HashSet<T> like magic.
     let search_paths = config.search_paths.clone();
+    // Convert from Vec<T> to HashSet<T> like magic.
     let search_paths = search_paths.move_iter().collect();
 
     Options {
