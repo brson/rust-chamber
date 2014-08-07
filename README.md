@@ -109,3 +109,4 @@ TODO: looping, unwinding, stack overflow, memory leaks, abort, oom
   (stack overflow, double fail).
 * Investigate impact of native rt injection.
 * Add more chambers.
+* Disallow #[no_mangle]
