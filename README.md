@@ -82,6 +82,7 @@ These are turned off.
 * `extern crate`
 * `unsafe` blocks
 * `#[feature(...)]`
+* `#[no_mangle]`
 
 
 ## Chambers
