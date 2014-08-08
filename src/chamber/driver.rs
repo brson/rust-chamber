@@ -51,7 +51,7 @@ fn parse_config(mut args: Vec<String>) -> ExeMode {
     use rustc::driver::config::parse_crate_types_from_list;
     use getopts::{getopts};
 
-    let _ = args.shift().unwrap();
+    let _ = args.remove(0).unwrap();
 
     if args.is_empty() { return Help }
 
