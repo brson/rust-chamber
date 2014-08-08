@@ -12,7 +12,7 @@ extern crate core;
 
 // This is everything but `any` and `intrinsics`.
 
-pub use core::atomics;
+pub use core::atomic;
 pub use core::bool;
 pub use core::cell;
 pub use core::clone;
