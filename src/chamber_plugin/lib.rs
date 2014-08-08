@@ -41,6 +41,9 @@ pub fn plugin_registrar(reg: &mut Registry) {
             fail!("can't get arguments for crate limit");
         }
     }
+
+    // #[no_mangle] can be used to override weak symbols
+    reg.register_lint_pass(box NoManglePass);
 }
 
 local_data_key!(key_params: String)
@@ -110,7 +113,7 @@ impl CrateLimitPass {
 }
 
 declare_lint!(CH_CRATE_LIMIT, Forbid,
-              "enforces")
+              "enforces limits on which crates can be linked")
 
 impl LintPass for CrateLimitPass {
     fn get_lints(&self) -> LintArray {
@@ -140,6 +143,26 @@ impl LintPass for CrateLimitPass {
                 }
             }
             ast::ViewItemUse(_) => ( /* nbd */ )
+        }
+    }
+}
+
+struct NoManglePass;
+
+declare_lint!(CH_NO_MANGLE, Forbid,
+              "forbids #[no_mangle]")
+
+impl LintPass for NoManglePass {
+    fn get_lints(&self) -> LintArray {
+        lint_array!(CH_NO_MANGLE)
+    }
+
+    fn check_attribute(&mut self, ctx: &Context, attr: &ast::Attribute) {
+
+        use syntax::attr;
+
+        if attr::contains_name(&[attr.node.value], "no_mangle") {
+            ctx.span_lint(CH_NO_MANGLE, attr.span, "chamber: no_mangle");
         }
     }
 }
